@@ -1,6 +1,3 @@
-
-
-
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -159,21 +156,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// app.get("/userData", async (req, res) => {
-//   const { email } = req.query;
-//   try {
-//     const user = await rgModel.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-//     res.status(200).json({ user });
-//   } catch (error) {
-//     console.error("Error fetching user data:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// });
-
-
 
 app.get("/userData", async (req, res) => {
   const { email } = req.query;
@@ -205,83 +187,18 @@ app.delete("/delete/:id", async (req, res) => {
 });
 
 
-// app.put("/update/:id", async (req, res) => {
-//   const idToUpdate = req.params.id;
-//   try {
-//       const updatedData = req.body; 
-//       const updatedItem = await dbModel.updateOne({ _id: idToUpdate }, updatedData);
-//       // if (!updatedItem) {
-//       //     return res.status(404).json({ error: "Item not found" });
-//       // }
-//       res.status(200).json({ message: "Item updated successfully", updatedItem });
-//   } catch (error) {
-//       console.error("Error updating item:", error);
-//       res.status(500).json({ error: "Failed to update item" });
-//   }
-// });
 
-
-
-
-// app.put("/edit/:id", async (req, res) => {
-//   try {
-//     const idToEdit = req.params.id;
-//     const updateDetails = req.body; 
-//     const update = await YourModel.updateOne({ _id: idToEdit }, updateDetails);
-
-//     if (update.nModified === 0) {
-//       return res.status(404).json({ message: "Profile not found or not updated" });
-//     }
-
-//     res.status(200).json({ message: "Profile updated successfully" });
-//   } catch (error) {
-//     console.error("error", error);
-//     res.status(400).json({ message: error.message });
-//   }
-// });
-
-
-
-
-
-
-// app.put("/edit/:id", async (req, res) => {
-//   try {
-//     const idToEdit = req.params.id;
-//     console.log("id", idToEdit);
-//     const updates = req.body; // assuming you're sending the updates in the request body
-//     const response = await axios.put(`http://localhost:8000/userData/${idToEdit}`, updates);
-//     res.send(response.data);
-//   } catch (error) {
-//     console.error("Error editing profile:", error);
-//     res.status(500).send({ message: "Error editing profile" });
-//   }
-// });
-
-
-// GET endpoint to fetch data by ID
-app.get('/get/:id', async (req, res) => {
+app.put("/update/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const data = await Resume.findById(id);
-    res.json(data);
-  } catch (err) {
-    res.status(404).json({ message: 'Data not found' });
+    const updateData = req.body;
+    const updatedProfile = await dbModel.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json(updatedProfile);
+  } catch (error) {
+    console.error("Error updating data:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
-
-// PUT endpoint to update data
-app.put('/update/:id', async (req, res) => {
-  try {
-    const { id, updatedData } = req.body;
-    const updatedResume = await Resume.findByIdAndUpdate(id, updatedData, { new: true });
-    res.json(updatedResume);
-  } catch (err) {
-    res.status(400).json({ message: 'Failed to update data' });
-  }
-});
-
-
 
 mongoose.connect(
   "mongodb+srv://"+ username+":"+password+"@cluster0.r2vrqr2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/resume"
