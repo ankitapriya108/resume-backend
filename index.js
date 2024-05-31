@@ -6,7 +6,7 @@ import "dotenv/config";
 
 
 const app = express();
-const port = 8000;
+const port = 'https://resume-backend-7ze5.onrender.com';
 const username = process.env.MONGO_USERNAME;
 const password = encodeURIComponent(process.env.MONGO_PASSWORD);
 app.use(express.json());
