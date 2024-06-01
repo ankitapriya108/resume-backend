@@ -4,9 +4,9 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 
-
+// const baseurl = "https://resume-backend-7ze5.onrender.com"
 const app = express();
-const port = 'https://resume-backend-7ze5.onrender.com';
+const port = process.env.PORT || 8000;
 const username = process.env.MONGO_USERNAME;
 const password = encodeURIComponent(process.env.MONGO_PASSWORD);
 app.use(express.json());
