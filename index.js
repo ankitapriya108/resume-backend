@@ -1,4 +1,3 @@
-
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -6,25 +5,32 @@ import bcrypt from "bcrypt";
 import "dotenv/config";
 import multer from 'multer';
 import path from 'path';
+import { fileURLToPath } from "url";
 
 
 const app = express();
-const port = 8000;
+const port = process.env.PORT || 8000; 
 const username = process.env.MONGO_USERNAME;
 const password = encodeURIComponent(process.env.MONGO_PASSWORD);
+
 app.use(express.json());
 app.use(cors({
   origin: "*"
 }));
 app.use(express.urlencoded({ extended: true }));
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));  
+app.use('/resume', express.static(path.join(__dirname, 'resume')));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    cb(null,file.fieldname + "-" + Date.now() + path.extname(file.originalname));
   }
 });
 
@@ -85,40 +91,48 @@ const dbSchema = new mongoose.Schema({
 const dbModel = mongoose.model("information", dbSchema);
 
 app.get("/", async (req, res) => {
-  const data = await dbModel.find();
-  res.send(data);
-  console.log(data);
+  try {
+    const data = await dbModel.find();
+    res.send(data);
+    console.log(data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
-
-// app.post("/send", async (req, res) => {
-//   const dataToSave = new dbModel(req.body);
-//   await dataToSave.save();
-//   res.send("Data saved");
-//   console.log(dataToSave);
-// });
 
 app.post("/send", upload.single('image'), async (req, res) => {
   const { name, email, role, totalExp, about, aboutPoint, data, workExperience } = req.body;
   const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+console.log(req.file) ; 
+
   const dataToSave = new dbModel({
-    mydetails: { // Change from array to object for clarity
-      image: imageUrl,
-      name,
-      email,
-      role,
-      totalExp
-    },
-    aboutme: { // Change from array to object for clarity
-      about,
-      aboutPoint: JSON.parse(aboutPoint)
-    },
-    skills: { // Change from array to object for clarity
-      data: JSON.parse(data)
-    },
-    work: { // Change from array to object for clarity
-      workExperience: JSON.parse(workExperience)
-    }
+    mydetails: [
+      {
+        image: imageUrl,
+        name: name,
+        email: email,
+        role: role,
+        totalExp: totalExp
+      }
+    ],
+    aboutme: [
+      {
+        about: about,
+        aboutPoint: JSON.parse(aboutPoint)
+      }
+    ],
+    skills: [
+      {
+        data: JSON.parse(data)
+      }
+    ],
+    work: [
+      {
+        workExperience: JSON.parse(workExperience)
+      }
+    ]
   });
 
   try {
@@ -126,7 +140,7 @@ app.post("/send", upload.single('image'), async (req, res) => {
     res.status(200).json({ message: "Data saved successfully", data: dataToSave });
   } catch (error) {
     console.error("Error saving data:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
